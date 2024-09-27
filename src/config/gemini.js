@@ -1,57 +1,56 @@
 import {
-    GoogleGenerativeAI,
-    HarmCategory,
-    HarmBlockThreshold,
+  GoogleGenerativeAI,
+  HarmCategory,
+  HarmBlockThreshold,
 } from "@google/generative-ai";
 
-const MODEL_NAME = "gemini-1.0-pro";
-const API_KEY = "AIzaSyBmG0VysURQ7M4iGx2b18EWSCXRT_bIpWU";
+const MODEL_NAME = import.meta.env.VITE_GEMINI_MODEL_NAME;
+const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
 async function runChat(prompt) {
-    const genAI = new GoogleGenerativeAI(API_KEY);
-    
-    // Fetch the model properly with await
-    const model = await genAI.getGenerativeModel({model: MODEL_NAME});
-    
-    const generationConfig = {
-        temperature: 0.9,
-        topP: 1,
-        topK: 1,
-        maxOutputTokens: 2048,
-    };
+//   console.log(`MODEL_NAME: ${MODEL_NAME}`);
+//   console.log(`API_KEY: ${API_KEY}`);
+  const genAI = new GoogleGenerativeAI(API_KEY);
 
-    const safetySettings = [
-        {
-            category: HarmCategory.HARM_CATEGORY_HARASSEMENT,
-            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-        },
-        {
-            category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-        },
-        {
-            category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-        },
-        {
-            category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-        },
-    ];
+  const model = genAI.getGenerativeModel({ model: MODEL_NAME });
 
-    // Ensure model is being used after it's awaited
-    const chat = model.startChat({
-        generationConfig,
-        safetySettings,
-        history: [],
-    });
+  const generationConfig = {
+    temperature: 0.9,
+    topP: 1,
+    topK: 1,
+    maxOutputTokens: 2048,
+  };
 
-    // Send the message and wait for the response
-    const result = await chat.sendMessage(prompt);
-    const response = result.response;
-    
-    // Log the response correctly
-    console.log(response.text());
+  const safetySettings = [
+    {
+      category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+      threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+    },
+    {
+      category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+      threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+    },
+    {
+      category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+      threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+    },
+    {
+      category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+      threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+    },
+  ];
+
+  const chat = model.startChat({
+    generationConfig,
+    safetySettings,
+    history: [],
+  });
+
+  const result = await chat.sendMessage(prompt);
+  const response = result.response;
+
+  console.log(response.text());
+  return response.text();
 }
 
 export default runChat;
