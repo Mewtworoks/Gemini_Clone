@@ -11,16 +11,35 @@ const ContextProvider = (props) => {
   const [loading, setLoading] = useState(false);
   const [resultData, setResultData] = useState("");
 
+  const delayPara = (index, nextWord) => {
+    setTimeout(() => {
+      setResultData((prev) => prev + nextWord); 
+    }, 50 * index);
+  };
+
+  const newChat = () => {
+    setLoading(false);
+    setShowResult(false);
+  }
+
   const onSent = async () => {
-    setResultData("");
-    setLoading(true);
-    setShowResult(true);
-    setRecentPrompt(input);
+    setLoading(true);  
+    setShowResult(true);  
+    let prompt = input; // Use input if prompt is undefined
+
+    setPrevPrompts(prev => [...prev, prompt]);
+    setRecentPrompt(prompt);
 
     try {
-      const response = await runChat(input);  
-      console.log("Response:", response);  
-      setResultData(response);  
+      const response = await runChat(prompt);  
+      console.log("Response:", response);
+
+      let newResponseArray = response.split(" ");
+      setResultData(""); 
+      for (let i = 0; i < newResponseArray.length; i++) {
+        const nextWord = newResponseArray[i];
+        delayPara(i, nextWord + " ");
+      }
     } catch (error) {
       console.error("Error fetching response:", error);
       setResultData("Sorry, something went wrong.");
@@ -42,6 +61,7 @@ const ContextProvider = (props) => {
     resultData,
     input,
     setInput,
+    newChat
   };
 
   return (
